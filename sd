@@ -1,0 +1,63 @@
+Product review and rating system allows customers to submit ratings and reviews for products, helping other users make informed purchasing decisions.
+
+
+rating 1-5
+text reviews
+helpful votes
+images
+moderate - manual/AI driven
+
+Service
+	review submission - validation -aggregation - moderate workflows - authentication and authorization
+
+database - SQL and NoSQL
+
+	- users table
+	- product table
+	- review table - indexing
+
+API
+
+Load balancing - Caching - performance optimization
+
+
+AWS
+
+S3
+RDS (relational vs NoSQL)
+
+CloudFront - Content delivery network  - cached review data, reducing latency
+ElastiCache
+
+
+Lambda
+
+Amazon API Gateway - built-in authentication, rate limiting, and request validation
+
+Analytics and Monitoring
+
+CloudWatch 
+Elasticsearch 
+
+
+Event-driven
+
+EventBridge - 
+Step Functions - multi-step review processing workflows, including submission validation, content moderation, and aggregation updates
+
+
+Aggregations
+Average  - Total Review Count - Rating Distribution:
+
+
+
+What's the difference between latency and throughput
+
+When would you choose SQL vs NoSQL for a project?
+Explain the role of a load balancer and API Gateway
+
+Fault tolerance - eliminate single points of failure by implementing redundancy (like multiple copies of data or services), automatic failover mechanisms to switch to backups when a primary fails, and load balancing to distribute traffic
+
+
+
+
