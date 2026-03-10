@@ -1,0 +1,26 @@
+Completed:
+
+Setup Infra and CI/CD for AstraStudio (Adhesh)
+Implemented HRS invokeLammbda actions and integrated with SkyTransit (Anaya)
+Implemented Astra invokeLammbda custom element and connector (Anaya)
+Setup React based BPMN Web Modeler (Sourabh)
+Setup SpringBoot application for AstraStudio Backend (Sourabh)
+
+POC on SkyTransit (on-prem -> aws : BCP) (Prashant)
+POC on SkyPath (aws -> on-prem : Zeebe) (Prashant)
+POC on on-prem Zeebe (Prashant)
+Tenant definition for Cloud resources (Prashant)
+
+Todo:
+
+Setup Inra, CI/CD with SpringBoot ECS application for AstraWorkerPlane (Adhesh)
+Setup CloudWatch Monitoring account (Adhesh)
+Implement Workers for AWS calls (Anaya)
+Implement HRS Action to support aws (Anaya)
+HRS - Tenant integration (Prashant)
+Integrate Zeebe JobWorkerMetrics with CloudWatch (Prashant)
+Implement AuditLogger in S3 (Prashant)
+Implementing CRUD API for Tenant based Actions supports SecurityContext (Sourabh)
+Implement S3 Audit retrieval (Sourabh)
+Integrate Zeebe with AstraStudioCentralPlane (Prashant)
+Implement Lambda for Publish and Trigger Workflow (Anaya)
