@@ -1,0 +1,50 @@
+Worker Design
+
+- multi-tenant Zeebe workers in Spring Boot/Java on AWS.
+
+- Workers poll jobs from multi-tenant Zeebe cluster, handling business logic like cross-account AWS calls (S3/Lambda/SQS/FIS). 
+
+- Central monitoring account linked to source accounts for metrics/logs viewing/alarms.
+
+
+Metrics 
+
+- Implicit
+- Collect execution time, success/fail/validation error automatically via Zeebe's JobWorkerMetrics built-in Micrometer-compatible metrics
+- counters: activated/handled/failed 
+- timers: duration
+- gauge: available jobs
+- Dimensions: tenant, jobType.
+- Enable via Spring Boot's Micrometer StatsD exporter
+- async publish: Micrometer StatsD -> CloudWatch Agent (retries/batching).
+- No explicit code; auto-tagged with jobType/tenant.
+
+Application Logs
+
+- INFO/ERROR/TRACE levels to CloudWatch Logs
+- Centralized monitoring via cross-account observability
+- Explicit
+
+Business Logs (Audit Logs)
+
+- Capture inputs, outputs, remote calls/responses in JSON 
+- uniqueId, tenant, timestamp, tag ("summary" or "detail").
+- Maintain timestamp order, scale via async batching.
+- worker sends a JSON payload via an async SDK call to Firehose, which then handles the batching (e.g., every 60 seconds or 5MB) before pushing to S3.
+- S3 publish: partition by date/tenant/uniqueId (e.g., s3://bucket/{tenantId}/yyyy/MM/dd/{uniqueId}.json)
+- S3 Configurable retention
+- Non-blocking/timestamp order/Fault-tolerant (retry / shutdown flushes queue / scalable)
+- capture (inputs/outputs) for all workers can be made implicit using Spring AOP
+- @Before/@AfterReturning/@AfterThrowing
+- MDC - uniqueId, tenant, input vars
+- Retrieval by uniqueId+tenant
+- Retrieval audits by tenant Day
+- Retrieval by Date Range
+- optionally intercepting remote calls rather than logging in worker method itself
+
+
+Testing
+
+Unit: Mock ZeebeClient/business logic (JUnit/Mockito). 
+Integration: zeebe-process-test with embedded Zeebe, validate full flows, logs, metrics mocks.
+
