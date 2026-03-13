@@ -1,63 +1,59 @@
-Product review and rating system allows customers to submit ratings and reviews for products, helping other users make informed purchasing decisions.
+That sounds like a classic "cascading failure" Friday evening. It’s never just one thing, is it? It’s the Auth service, then the upstream delay, then the "thundering herd" of stale alerts.
 
+Here is a drafted post-mortem summary that organizes those moving parts into a clear, professional narrative.
 
-rating 1-5
-text reviews
-helpful votes
-images
-moderate - manual/AI driven
+---
 
-Service
-	review submission - validation -aggregation - moderate workflows - authentication and authorization
+## Incident Post-Mortem: HRS Workflow Efficacy Degradation
 
-database - SQL and NoSQL
+**Date:** March 6, 2026
 
-	- users table
-	- product table
-	- review table - indexing
+**Time:** 7:30 PM – 9:15 PM IST (approx. 105 minutes)
 
-API
+**Status:** Resolved
 
-Load balancing - Caching - performance optimization
+**Impact:** HRS Workflow efficacy dropped from **98% to 58%**.
 
+### 1. Executive Summary
 
-AWS
+On March 6th at 7:30 PM IST, the HRS application experienced a significant drop in workflow efficacy. The incident was triggered by a firmwide Auth Service outage (Parent Incident: xxxx). While the parent incident lasted 45 minutes, the downstream effects—specifically stalled alerts from the Fabric system and a backlog of stale data—extended the recovery time. Full service was restored after a core server restart and a manual purge of stale alert entries.
 
-S3
-RDS (relational vs NoSQL)
+### 2. HRS Background
 
-CloudFront - Content delivery network  - cached review data, reducing latency
-ElastiCache
+The **HRS (Human Resources System)** application serves as an automated processing layer for system alerts. It receives data from the **Fabric** system, communicates with a central **Workflow Engine** to execute business logic, and ensures high-priority tasks are routed correctly. If HRS cannot authenticate or if the Workflow Engine is unreachable, alerts transition to a "Failed" state.
 
+### 3. Incident Description
 
-Lambda
+At 7:30 PM IST, a firmwide interruption of the **Auth Service** prevented HRS from communicating with the Workflow Engine. This caused an immediate spike in execution failures.
 
-Amazon API Gateway - built-in authentication, rate limiting, and request validation
+Simultaneously, the **Fabric** system (upstream) experienced a 45-minute delay in forwarding alerts to HRS. Once Fabric connectivity was restored, it released a "thundering herd" of stalled alerts. By this time, many alerts had either been handled manually via **AppHero** or closed within Fabric. When HRS attempted to process this massive volume of stale data, efficacy plummeted to 58% due to "already closed" or "conflict" errors.
 
-Analytics and Monitoring
+---
 
-CloudWatch 
-Elasticsearch 
+### 4. What Went Wrong?
 
+* **Dependency Failure:** The Auth Service outage created a hard stop for all HRS workflow executions.
+* **Upstream Backpressure:** Fabric’s 45-minute delay resulted in a sudden burst of high-volume traffic that HRS wasn't optimized to "drain" efficiently.
+* **State Mismatch:** Because Fabric alerts were released to AppHero for manual handling during the downtime, HRS attempted to process alerts that were already technically "Resolved" or "Stale," leading to a high failure rate.
+* **Slow Organic Recovery:** Restarting core servers improved the system's "health," but didn't address the bad data (stale alerts) already in the pipe.
 
-Event-driven
+### 5. What Went Good?
 
-EventBridge - 
-Step Functions - multi-step review processing workflows, including submission validation, content moderation, and aggregation updates
+* **Detection:** PagerDuty alerted the team immediately upon the efficacy drop.
+* **Collaboration:** Operations and Engineering synced quickly to identify the external dependency (Auth Service).
+* **Manual Intervention:** The decision to manually clean stale alerts was the correct "circuit breaker" to restore 98% efficacy.
 
+---
 
-Aggregations
-Average  - Total Review Count - Rating Distribution:
+### 6. Action Items
 
+| Task | Owner | Priority |
+| --- | --- | --- |
+| **Circuit Breaker Implementation:** Develop logic to automatically discard alerts older than $X$ minutes if already handled by AppHero. | Engineering | High |
+| **Auth Caching:** Investigate short-term token caching to allow HRS to continue limited operations during Auth Service blips. | Architecture | Medium |
+| **Fabric Sync Optimization:** Improve the "Handshake" between Fabric and HRS to check alert status *before* attempting workflow execution. | Engineering | High |
+| **Runbook Update:** Document the "Manual Cleanup" steps for stale alerts to reduce Time to Resolve (TTR) in future incidents. | Operations | Low |
 
+---
 
-What's the difference between latency and throughput
-
-When would you choose SQL vs NoSQL for a project?
-Explain the role of a load balancer and API Gateway
-
-Fault tolerance - eliminate single points of failure by implementing redundancy (like multiple copies of data or services), automatic failover mechanisms to switch to backups when a primary fails, and load balancing to distribute traffic
-
-
-
-
+Would you like me to refine the **Action Items** section with specific technical stacks, or perhaps draft a **Timeline** of events to include in the final report?
