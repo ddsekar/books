@@ -1,10 +1,23 @@
-The Workflow
-List all versions of the object, ordered from newest to oldest.
+**Ticket Title: Implement Stale Alert Management and Workflow Validation APIs**
 
-Iterate and Fetch Tags: For each version, check if it has the RELEASED tag.
+**Description**  
+Current workflow executions can get stuck in ExecutionBuffer due to infrastructure or design issues, causing stale alerts. This ticket addresses detection, cleanup, pre-validation, and logging for better reliability and traceability.
 
-Track the "Release" Points: Identify the index of the first (latest) and second "RELEASED" versions.
+## Tasks Overview
 
-Target the Gap: Collect all VersionIds that exist chronologically between those two points.
+**1. Stale Alerts Check API**  
+Develop an API to list alerts stuck in ExecutionBuffer beyond the fabric timeout window. Include filters for duration and status to identify stalled executions needing intervention.
 
-Execute Batch Delete: Send a delete request for that specific list of IDs.
+**2. Stale Alerts Cleanup API**  
+- Clean up completed alerts ready for purging.  
+- Remove incomplete alerts waiting beyond the fabric timeout window.
+
+**3. Workflow Pre-Validation**  
+Add validation before workflow execution: check if the workflow is within the stale window. Terminate execution immediately if outside the fabric REST timeout window.
+
+**4. Workflow Traceability Logging**  
+Implement comprehensive logging at each action level during workflow execution for full traceability of alerts. Include timestamps, status changes, and key parameters.
+
+**Priority:** High  
+**Estimated Effort:** 3-5 days  
+**Acceptance Criteria:** APIs tested with sample stale data; validation prevents out-of-window executions; logs verifiable in CloudWatch.
