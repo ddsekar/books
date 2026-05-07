@@ -1,32 +1,22 @@
+Sequence Flows
 
+Camunda 8.9
+GET /v1/process-instances/{key}/sequence-flows
 
-### Problem Statement
-The organization requires a system capable of ingesting and indexing a high-velocity stream of **1 million events per hour** (approx. 24 million events daily). The core challenges include:
-
-* **High-Throughput Processing:** Handling 280+ events per second with consistent latency.
-* **Search Complexity:** Requirements for full-text search, complex filtering by `situation_id` and `workflow_id`, and deep pagination (e.g., jumping to the 50th or last page) across massive datasets.
-* **Data Lifecycle Management:** Balancing the cost of high-performance indexing (OpenSearch) with the scale of long-term storage (S3).
-* **Late-Arriving Events:** Accommodating out-of-order data that arrives days after a workflow has been marked as "closed" without compromising data integrity or storage efficiency.
+Camunda 8.5
+Once a task is finished, the engine discards the historical data and Workaround is query Elasticsearch index.
 
 
 
-### Proposed Solution: Hybrid Tiered-Storage Architecture
-We propose a serverless, event-driven architecture that decouples "Hot" real-time search from "Cold" historical archival.
+Security Patches
 
-#### 1. Real-Time Ingestion Tier
-* **Stream Processing:** **AWS MSK (Managed Streaming for Kafka)** serves as the backbone, utilizing `workflow_id` as the partition key to ensure strictly ordered processing for each execution.
-* **Dual-Write Lambda:** A consumer service indexes events into **Amazon OpenSearch** for immediate visibility and simultaneously updates a **DynamoDB** metadata table to track the state and storage location of every workflow.
+8.5 is in "unmaintained" status
 
-#### 2. Tiered Storage & Retrieval
-* **Hot Tier (0-5 Days):** Events are stored in OpenSearch with a 5-day TTL. This enables sub-second full-text search and rapid filtering for active investigations.
-* **Cold Tier (5+ Days):** Events are grouped by `workflow_id` and stored as partitioned objects in **Amazon S3**. 
-* **Seamless Query Logic:** An API abstraction layer first checks OpenSearch; if data is expired, it uses DynamoDB metadata to locate the S3 prefix and queries the data using **Amazon Athena**.
 
-#### 3. Optimized User Experience
-* **Intelligent Pagination:** To address performance bottlenecks in deep paging, the system employs **Reverse-Sort Optimization** for jumping to the last page and **Point-in-Time (PIT)** snapshots for arbitrary page access within the 10,000-record window.
-* **Late-Arrival Handling:** Late events are captured in S3 as "delta" files within the workflow's specific prefix, ensuring the historical record remains complete without the overhead of rewriting large immutable objects.
+Scalability & Performance
+- cluster performance under heavy load
+- memory management
+- overhead to publish data to Elasticsearch vs rdbms
+- Execution Listeners - workaround to add service tasks
 
-### Key Benefits
-* **Scalability:** Independently scales the ingestion (MSK), compute (Lambda), and storage (S3) layers.
-* **Cost Efficiency:** Reduces OpenSearch costs by ~80% by offloading 5-day-old data to S3.
-* **Reliability:** Decouples search indices from the raw data, allowing for index recreations without data loss.
+
